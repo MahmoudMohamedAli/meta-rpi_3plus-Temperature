@@ -231,6 +231,10 @@ curl http://10.42.0.3:8080
 
 ---
 
+## Network Architecture
+
+![Network Diagram](docs/1.png)
+
 ## Maintainer
 
 Mahmoud Elkot
