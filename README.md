@@ -84,8 +84,9 @@ bitbake core-image-minimal
 
 ### 6. Flash SD card
 
-use the Bash script which exist under [flasher](flash_script/flash.sh)
-Note: make sure to Read the Bash script to change the paths and device name which connected to SD card
+- use the Bash script to flash image [flasher](flash_script/flash.sh)
+- Note: make sure to Read the Bash script to change the paths and device name "default: /dev/sdb" which mapped to SD card
+
 ---
 
 ## Network Boot Setup (TFTP + NFS)
