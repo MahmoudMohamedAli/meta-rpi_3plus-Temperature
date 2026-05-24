@@ -1,4 +1,4 @@
-# meta-mylayer
+# meta-rpi_3plus-Temperature
 
 A Yocto BSP layer for Raspberry Pi 3B that provides TFTP/NFS network boot configuration and builds the Temperature Monitor application into the image.
 
