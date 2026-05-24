@@ -1,0 +1,9 @@
+setenv serverip 10.42.0.1
+setenv ipaddr   10.42.0.3
+
+tftpboot ${kernel_addr_r} @@KERNEL_IMAGETYPE@@
+tftpboot ${fdt_addr_r}    bcm2710-rpi-3-b.dtb
+
+setenv bootargs "8250.nr_uarts=1 console=ttyS0,115200 console=ttyAMA0,115200 console=tty1 root=/dev/nfs nfsroot=10.42.0.1:/srv/nfs/rpi,v3,tcp rw ip=10.42.0.3:10.42.0.1:10.42.0.1:255.255.255.0::eth0:off loglevel=8"
+
+@@KERNEL_BOOTCMD@@ ${kernel_addr_r} - ${fdt_addr_r}
