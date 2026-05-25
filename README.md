@@ -33,6 +33,13 @@ meta-mylayer/
 ├── recipes-temperature-monitor/
 │   └── temperature-monitor/
 │       └── temperature-monitor.bb       ← App recipe
+|
+|
+├── recipes-system-monitor/
+│   └── system-monitor/
+│       ├── system-monitor.bb                ← Python app recipe
+│       └── files/
+│           └── system_monitor.py            ← Python source
 └── README.md
 ```
 
