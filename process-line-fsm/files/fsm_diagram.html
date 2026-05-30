@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #fff; }
+  .wrap { padding: 16px; }
+
+  /* Toggle buttons */
+  .controls { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+  .btn {
+    padding: 5px 13px; border-radius: 20px; border: 1.5px solid;
+    cursor: pointer; font-size: 11px; font-weight: 600;
+    background: transparent; transition: all .2s;
+  }
+  .btn.on { color: #fff !important; }
+  .bn { border-color:#0F6E56; color:#0F6E56; }  .bn.on { background:#0F6E56; }
+  .bf { border-color:#9A5A00; color:#9A5A00; }  .bf.on { background:#9A5A00; }
+  .be { border-color:#C0392B; color:#C0392B; }  .be.on { background:#C0392B; }
+  .br { border-color:#1565C0; color:#1565C0; }  .br.on { background:#1565C0; }
+  .bsh{ border-color:#666;    color:#666;    }  .bsh.on{ background:#666; }
+
+  /* Arrow groups – fade when hidden */
+  .gn,.gf,.ge,.gr,.gs { transition: opacity .25s; }
+  .hidden { opacity: 0.06 !important; pointer-events: none; }
+
+  /* Arrow common */
+  .arr { fill:none; stroke-width:1.8; }
+
+  /* State box hover */
+  .sbox { cursor: pointer; }
+  .sbox rect { transition: filter .15s; }
+  .sbox:hover rect { filter: brightness(.88); }
+
+  /* Info panel */
+  .info { margin-top:12px; padding:10px 14px; border:1px solid #ddd; border-radius:8px;
+          font-size:12px; min-height:44px; background:#fafafa; }
+  .chip { display:inline-flex; align-items:center; gap:5px; padding:3px 9px;
+          border-radius:5px; font-size:11px; font-family:monospace; margin:2px 3px; }
+  .cn  { background:#e6f4ef; color:#0a4a36; }
+  .cf  { background:#fef3e2; color:#6b3e00; }
+  .ce  { background:#fdecec; color:#7b1111; }
+  .cr  { background:#e8eef8; color:#0d3b72; }
+  .cs  { background:#f0f0f0; color:#444; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="controls">
+  <span style="font-size:11px;color:#888;line-height:28px;margin-right:4px">Show:</span>
+  <button class="btn bn on"  onclick="tog(this,'gn')">&#10003; Normal flow</button>
+  <button class="btn bf"     onclick="tog(this,'gf')">Fault paths</button>
+  <button class="btn be"     onclick="tog(this,'ge')">E-stop arrows</button>
+  <button class="btn br"     onclick="tog(this,'gr')">Recovery</button>
+  <button class="btn bsh"    onclick="tog(this,'gs')">&#8594; Shutdown</button>
+</div>
+
+<svg width="100%" viewBox="0 0 720 810" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="mn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M1 1L9 5L1 9" fill="none" stroke="#0F6E56" stroke-width="1.4" stroke-linecap="round"/>
+  </marker>
+  <marker id="mf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M1 1L9 5L1 9" fill="none" stroke="#9A5A00" stroke-width="1.4" stroke-linecap="round"/>
+  </marker>
+  <marker id="me" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M1 1L9 5L1 9" fill="none" stroke="#C0392B" stroke-width="1.4" stroke-linecap="round"/>
+  </marker>
+  <marker id="mr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M1 1L9 5L1 9" fill="none" stroke="#1565C0" stroke-width="1.4" stroke-linecap="round"/>
+  </marker>
+  <marker id="ms" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M1 1L9 5L1 9" fill="none" stroke="#666" stroke-width="1.4" stroke-linecap="round"/>
+  </marker>
+</defs>
+
+<!-- ══════════════════════════════════════
+     NORMAL FLOW  (teal)
+     ══════════════════════════════════════ -->
+<g class="gn hidden">
+  <!-- IDLE → STARTING -->
+  <line x1="140" y1="76" x2="140" y2="132" class="arr" stroke="#0F6E56" marker-end="url(#mn)"/>
+  <text x="145" y="108" font-size="11" fill="#0F6E56" font-family="monospace">start</text>
+
+  <!-- STARTING → RUNNING -->
+  <line x1="140" y1="184" x2="140" y2="246" class="arr" stroke="#0F6E56" marker-end="url(#mn)"/>
+  <text x="145" y="219" font-size="11" fill="#0F6E56" font-family="monospace">startup_done</text>
+
+  <!-- RUNNING → ITEM_DETECTED -->
+  <line x1="140" y1="302" x2="140" y2="374" class="arr" stroke="#0F6E56" marker-end="url(#mn)"/>
+  <text x="145" y="341" font-size="11" fill="#0F6E56" font-family="monospace">item_detected</text>
+
+  <!-- ITEM_DETECTED → PROCESSING -->
+  <line x1="140" y1="426" x2="140" y2="488" class="arr" stroke="#0F6E56" marker-end="url(#mn)"/>
+  <text x="145" y="460" font-size="11" fill="#0F6E56" font-family="monospace">begin_process</text>
+
+  <!-- PROCESSING → RUNNING  (left arc back up) -->
+  <path d="M40,514 Q-10,400 40,274" class="arr" stroke="#0F6E56" stroke-dasharray="6 3" marker-end="url(#mn)"/>
+  <text x="2"  y="406" font-size="10" fill="#0F6E56" font-family="monospace" text-anchor="middle" transform="rotate(-90,2,406)">process_done</text>
+
+  <!-- RUNNING → IDLE  (left arc) -->
+  <path d="M40,274 Q-4,165 40,50" class="arr" stroke="#0F6E56" stroke-dasharray="6 3" marker-end="url(#mn)"/>
+  <text x="22" y="161" font-size="10" fill="#0F6E56" font-family="monospace" text-anchor="end">stop</text>
+</g>
+
+<!-- ══════════════════════════════════════
+     FAULT PATHS  (amber)
+     ══════════════════════════════════════ -->
+<g class="gf hidden">
+  <!-- RUNNING → FAULT  (horizontal right) -->
+  <line x1="200" y1="268" x2="432" y2="268" class="arr" stroke="#9A5A00" marker-end="url(#mf)"/>
+  <text x="312" y="261" font-size="11" fill="#9A5A00" font-family="monospace" text-anchor="middle">sensor_fail</text>
+
+  <!-- PROCESSING → FAULT  (right then up) -->
+  <path d="M200,506 L384,506 L384,272 L432,272" class="arr" stroke="#9A5A00" marker-end="url(#mf)"/>
+  <text x="390" y="394" font-size="10" fill="#9A5A00" font-family="monospace">process_fail</text>
+</g>
+
+<!-- ══════════════════════════════════════
+     E-STOP ARROWS  (red)   all states → EMERGENCY_STOP
+     ══════════════════════════════════════ -->
+<g class="ge hidden">
+
+  <!-- Red bus: vertical dashed line on the right, x=668 -->
+  <line x1="668" y1="50" x2="668" y2="514" stroke="#C0392B" stroke-width="1.2" stroke-dasharray="5 4"/>
+  <text x="672" y="285" font-size="11" fill="#C0392B" font-family="monospace" font-weight="bold">e_stop</text>
+  <text x="672" y="298" font-size="11" fill="#C0392B" font-family="monospace">(bus)</text>
+
+  <!-- IDLE tick → bus -->
+  <line x1="200" y1="50" x2="668" y2="50" class="arr" stroke="#C0392B" stroke-width="1.6"/>
+  <circle cx="668" cy="50" r="4" fill="#C0392B"/>
+  <text x="204" y="44" font-size="10" fill="#C0392B" font-family="monospace">IDLE</text>
+
+  <!-- STARTING tick → bus -->
+  <line x1="200" y1="158" x2="668" y2="158" class="arr" stroke="#C0392B" stroke-width="1.6"/>
+  <circle cx="668" cy="158" r="4" fill="#C0392B"/>
+  <text x="204" y="152" font-size="10" fill="#C0392B" font-family="monospace">STARTING</text>
+
+  <!-- RUNNING: exit from bottom to avoid FAULT box, then right to bus -->
+  <path d="M160,302 L160,334 L668,334" class="arr" stroke="#C0392B" stroke-width="1.6"/>
+  <circle cx="668" cy="334" r="4" fill="#C0392B"/>
+  <text x="164" y="328" font-size="10" fill="#C0392B" font-family="monospace">RUNNING</text>
+
+  <!-- ITEM_DETECTED tick → bus -->
+  <line x1="200" y1="400" x2="668" y2="400" class="arr" stroke="#C0392B" stroke-width="1.6"/>
+  <circle cx="668" cy="400" r="4" fill="#C0392B"/>
+  <text x="204" y="394" font-size="10" fill="#C0392B" font-family="monospace">ITEM_DETECTED</text>
+
+  <!-- PROCESSING → EMERGENCY_STOP direct (same y) -->
+  <line x1="200" y1="514" x2="432" y2="514" class="arr" stroke="#C0392B" stroke-width="1.8" marker-end="url(#me)"/>
+  <text x="312" y="530" font-size="10" fill="#C0392B" font-family="monospace" text-anchor="middle">PROCESSING e_stop</text>
+
+  <!-- Bus → EMERGENCY_STOP right side -->
+  <line x1="668" y1="514" x2="632" y2="514" class="arr" stroke="#C0392B" stroke-width="1.8" marker-end="url(#me)"/>
+</g>
+
+<!-- ══════════════════════════════════════
+     RECOVERY  (blue dashed)
+     ══════════════════════════════════════ -->
+<g class="gr hidden">
+  <!-- FAULT → IDLE  (arc above, going over the top) -->
+  <path d="M524,246 L524,12 L140,12 L140,28" class="arr" stroke="#1565C0" stroke-dasharray="6 3" marker-end="url(#mr)"/>
+  <text x="330" y="9" font-size="11" fill="#1565C0" font-family="monospace" text-anchor="middle">reset &#8594; IDLE</text>
+
+  <!-- EMERGENCY_STOP → IDLE  (long arc left then up) -->
+  <path d="M432,502 L22,502 L22,50 L40,50" class="arr" stroke="#1565C0" stroke-dasharray="6 3" marker-end="url(#mr)"/>
+  <text x="8" y="276" font-size="10" fill="#1565C0" font-family="monospace" text-anchor="middle" transform="rotate(-90,8,276)">e_reset &#8594; IDLE</text>
+</g>
+
+<!-- ══════════════════════════════════════
+     SHUTDOWN PATHS  (gray)
+     ══════════════════════════════════════ -->
+<g class="gs hidden">
+  <!-- FAULT → SHUTDOWN  (far right then down) -->
+  <path d="M604,274 L650,274 L650,720 L415,720" class="arr" stroke="#666" marker-end="url(#ms)"/>
+  <text x="654" y="500" font-size="10" fill="#666" font-family="monospace">critical</text>
+
+  <!-- EMERGENCY_STOP → SHUTDOWN  (down) -->
+  <path d="M530,542 L530,712" class="arr" stroke="#666" marker-end="url(#ms)"/>
+  <text x="534" y="632" font-size="10" fill="#666" font-family="monospace">confirm_stop</text>
+</g>
+
+<!-- ══════════════════════════════════════
+     STATE BOXES  (always visible)
+     ══════════════════════════════════════ -->
+
+<!-- IDLE -->
+<g class="sbox" onclick="sel('IDLE')">
+  <rect x="40" y="28" width="200" height="48" rx="9" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+  <text x="140" y="49" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#2C2C2A">IDLE</text>
+  <text x="140" y="67" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#5F5E5A">Awaiting start button</text>
+</g>
+
+<!-- STARTING -->
+<g class="sbox" onclick="sel('STARTING')">
+  <rect x="40" y="136" width="200" height="48" rx="9" fill="#D0F0E6" stroke="#0F6E56" stroke-width="1"/>
+  <text x="140" y="157" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#043D30">STARTING</text>
+  <text x="140" y="175" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#0F6E56">Motor spinup 1.5s</text>
+</g>
+
+<!-- RUNNING -->
+<g class="sbox" onclick="sel('RUNNING')">
+  <rect x="40" y="250" width="200" height="52" rx="9" fill="#D0F0E6" stroke="#0F6E56" stroke-width="1"/>
+  <text x="140" y="272" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#043D30">RUNNING</text>
+  <text x="140" y="290" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#0F6E56">Conveyor moving</text>
+</g>
+
+<!-- ITEM_DETECTED -->
+<g class="sbox" onclick="sel('ITEM_DETECTED')">
+  <rect x="40" y="374" width="200" height="52" rx="9" fill="#EEEDFB" stroke="#534AB7" stroke-width="1"/>
+  <text x="140" y="396" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#3C3489">ITEM_DETECTED</text>
+  <text x="140" y="414" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#534AB7">Conveyor paused</text>
+</g>
+
+<!-- PROCESSING -->
+<g class="sbox" onclick="sel('PROCESSING')">
+  <rect x="40" y="488" width="200" height="52" rx="9" fill="#EEEDFB" stroke="#534AB7" stroke-width="1"/>
+  <text x="140" y="510" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#3C3489">PROCESSING</text>
+  <text x="140" y="528" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#534AB7">Actuator working</text>
+</g>
+
+<!-- FAULT -->
+<g class="sbox" onclick="sel('FAULT')">
+  <rect x="432" y="246" width="190" height="52" rx="9" fill="#FEF3E2" stroke="#9A5A00" stroke-width="1"/>
+  <text x="527" y="268" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#4A3300">FAULT</text>
+  <text x="527" y="286" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#9A5A00">Error detected</text>
+</g>
+
+<!-- EMERGENCY_STOP -->
+<g class="sbox" onclick="sel('EMERGENCY_STOP')">
+  <rect x="432" y="488" width="200" height="52" rx="9" fill="#FDEAEA" stroke="#C0392B" stroke-width="1.5"/>
+  <text x="532" y="510" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#7B1111">EMERGENCY_STOP</text>
+  <text x="532" y="528" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#C0392B">All motion halted</text>
+</g>
+
+<!-- SHUTDOWN -->
+<g class="sbox" onclick="sel('SHUTDOWN')">
+  <rect x="290" y="720" width="200" height="52" rx="9" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+  <text x="390" y="742" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#2C2C2A">SHUTDOWN</text>
+  <text x="390" y="760" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#5F5E5A">Powering down</text>
+</g>
+
+</svg>
+
+<!-- Info panel -->
+<div class="info" id="info">
+  <span style="color:#888">&#9654; Click any state to see its events</span>
+</div>
+
+</div>
+
+<script>
+const TR = {
+  IDLE:           [{ev:"start",to:"STARTING",t:"cn"},{ev:"e_stop",to:"EMERGENCY_STOP",t:"ce"}],
+  STARTING:       [{ev:"startup_done",to:"RUNNING",t:"cn"},{ev:"e_stop",to:"EMERGENCY_STOP",t:"ce"}],
+  RUNNING:        [{ev:"item_detected",to:"ITEM_DETECTED",t:"cn"},{ev:"stop",to:"IDLE",t:"cn"},{ev:"sensor_fail",to:"FAULT",t:"cf"},{ev:"e_stop",to:"EMERGENCY_STOP",t:"ce"}],
+  ITEM_DETECTED:  [{ev:"begin_process",to:"PROCESSING",t:"cn"},{ev:"e_stop",to:"EMERGENCY_STOP",t:"ce"}],
+  PROCESSING:     [{ev:"process_done",to:"RUNNING",t:"cn"},{ev:"process_fail",to:"FAULT",t:"cf"},{ev:"e_stop",to:"EMERGENCY_STOP",t:"ce"}],
+  FAULT:          [{ev:"reset",to:"IDLE",t:"cr"},{ev:"critical",to:"SHUTDOWN",t:"cs"}],
+  EMERGENCY_STOP: [{ev:"e_reset",to:"IDLE",t:"cr"},{ev:"confirm_stop",to:"SHUTDOWN",t:"cs"}],
+  SHUTDOWN:       []
+};
+
+const ACTIVE = {gn:true,gf:false,ge:false,gr:false,gs:false};
+
+function tog(btn,cls){
+  const on = !ACTIVE[cls];
+  ACTIVE[cls] = on;
+  btn.classList.toggle('on', on);
+  document.querySelectorAll('.'+cls).forEach(el => el.classList.toggle('hidden', !on));
+}
+
+function sel(id){
+  const rows = TR[id];
+  const info = document.getElementById('info');
+  if(!rows.length){
+    info.innerHTML = '<b>'+id+'</b> — terminal state. No outgoing transitions.';
+    return;
+  }
+  let h = '<b style="font-size:13px">'+id+'</b> &nbsp;events:<br/><div style="margin-top:6px">';
+  rows.forEach(r => {
+    h += '<span class="chip '+r.t+'"><b>'+r.ev+'</b> &rarr; '+r.to+'</span>';
+  });
+  h += '</div>';
+  info.innerHTML = h;
+}
+
+// start with normal flow visible
+document.querySelector('.bn').dispatchEvent(new Event('click'));
+</script>
+</body>
+</html>
